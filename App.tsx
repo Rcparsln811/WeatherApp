@@ -4,7 +4,7 @@ import { View, Text, StyleSheet } from 'react-native';
 const App = () => {
   return (
     <View style={styles.container}>
-      <Text>Hello, React Native!</Text>
+      <Text>Hello, React ffNative!</Text>
     </View>
   );
 };
