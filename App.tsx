@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import * as Location from 'expo-location';
 
-const BASE_URL = `https://api.openweathermap.org/data/2.5/weather?lat=40.838720&lon=31.162609&appid=e8ec05419e180546c3b9a34f08219ebb&units=metric`;
-const OPEN_WEATHER_KEY = process.env.EXPO_PUBLIC_OPEN_WEATHER_KEY;
+
+const BASE_URL = `https://api.openweathermap.org/data/2.5/weather`;
+const OPEN_WEATHER_KEY = 'e8ec05419e180546c3b9a34f08219ebb';
 
 type Weather = {
   name: string;
@@ -20,23 +22,50 @@ type Weather = {
  };
 
 const WeatherApp = () => {
+  const [location, setLocation] = useState<Location.LocationObject>();
+  const [errorMsg, setErrorMsg] = useState('');
   const [weather, setWeather] = useState<Weather>();
+
+  
+
+
+  useEffect (()=> {
+    fetchWeather();
+   }, []);
+
+   useEffect(() => {
+    (async () => {
+      
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setErrorMsg('Permission to access location was denied');
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location);
+    })();
+  }, []);
+
+  let text = 'Waiting..';
+  if (errorMsg) {
+    text = errorMsg;
+  } else if (location) {
+    text = JSON.stringify(location);
+  }
 
   const fetchWeather = async () => {
     const lat = 40.838720;
     const lon = 31.162609;
 
     const results = await fetch(
-      BASE_URL
+      `${BASE_URL}?lat=${lat}&lon=${lon}&appid=${OPEN_WEATHER_KEY}&units=metric`
     );
-    
     const data = await results.json();
     setWeather(data);
     
   };
-  useEffect (()=> {
-    fetchWeather();
-   }, []);
+  
 
    if(!weather){
     return <ActivityIndicator/>;
@@ -53,7 +82,7 @@ const WeatherApp = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: '#CFCFCF',
     justifyContent: 'center',
     alignItems: 'center',
   },
