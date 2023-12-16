@@ -1,25 +1,38 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, ImageBackground, Image } from 'react-native';
 import * as Location from 'expo-location';
+import LottieView from 'lottie-react-native';
 
 
 const BASE_URL = `https://api.openweathermap.org/data/2.5/weather`;
 const OPEN_WEATHER_KEY = 'e8ec05419e180546c3b9a34f08219ebb';
 
-type Weather = {
-  name: string;
-  main: {
-        temp: number;
-        feels_like: number;
-        temp_min: number;
-        temp_max: number;
-        pressure: number;
-        humidity: number;
-        sea_level: number;
-        grnd_level: number; 
-      
+const bgImage =
+  'https://notjustdev-dummy.s3.us-east-2.amazonaws.com/vertical-images/1.jpg';
+
+  type MainWeather = {
+    temp: number;
+    feels_like: number;
+    temp_min: number;
+    temp_max: number;
+    pressure: number;
+    humidity: number;
+    sea_level: number;
+    grnd_level: number;
   };
- };
+
+ type Weather = {
+  name: string;
+  main: MainWeather;
+  weather: [
+    {
+      id: string;
+      main: string;
+      description: string;
+      icon: string;
+    }
+  ];
+};
 
 const WeatherApp = () => {
   const [location, setLocation] = useState<Location.LocationObject>();
@@ -33,26 +46,6 @@ const WeatherApp = () => {
     fetchWeather();
    }, []);
 
-   useEffect(() => {
-    (async () => {
-      
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setErrorMsg('Permission to access location was denied');
-        return;
-      }
-
-      let location = await Location.getCurrentPositionAsync({});
-      setLocation(location);
-    })();
-  }, []);
-
-  let text = 'Waiting..';
-  if (errorMsg) {
-    text = errorMsg;
-  } else if (location) {
-    text = JSON.stringify(location);
-  }
 
   const fetchWeather = async () => {
     const lat = 40.838720;
@@ -71,11 +64,34 @@ const WeatherApp = () => {
     return <ActivityIndicator/>;
    }
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.location}>{weather.name}</Text>
-      <Text style={styles.temp}>{Math.round(weather.main.temp)}°</Text>
-    </View>
+   return (
+    <ImageBackground source={{ uri: bgImage }} style={styles.container}>
+      <View
+        style={{
+          ...StyleSheet.absoluteFillObject,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        }}
+      />
+
+      
+
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <View style={styles.raincon}>
+          <Image
+           style={styles.rain}
+           source={require('./assests/rain.png')}
+         />
+          
+        </View>
+
+        
+      
+        <Text style={styles.location}>{weather.name}</Text>
+        <Text style={styles.temp}>{Math.round(weather.main.temp)}°</Text>
+        
+      </View>
+ 
+    </ImageBackground>
   );
 };
 
@@ -85,17 +101,43 @@ const styles = StyleSheet.create({
     backgroundColor: '#CFCFCF',
     justifyContent: 'center',
     alignItems: 'center',
+    paddingTop: 10,
   },
   location: {
     fontFamily: 'OpenSans',
-    fontSize: 30,
+    fontSize: 50,
+    position: 'absolute',
+    top: '50%',
+    transform: [{ translateY: 40 }], 
+    
   },
   temp: {
     fontFamily: 'InterBlack',
-    fontSize: 70,
+    fontSize: 110,
     color: 'darkgray',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    position: 'absolute',
+    top: '50%',
+    transform: [{ translateY: -90 }], 
   },
-})
+  rain: {
+    width: 200,
+    height: '50%',
+    padding: 0,
+    paddingVertical: 20,
+    position: 'absolute',
+    top: 0,
+  },
+  raincon: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 100,
+    height: '50%',
+    paddingVertical: 0,
+    paddingTop: 10,
+    transform: [{ translateY: -170 }],
+  }
+});
 
 export default WeatherApp;
+
